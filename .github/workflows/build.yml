@@ -1,0 +1,101 @@
+name: Construire Milon
+
+# À chaque modification (code ou mots), on reconstruit la base et l'APK.
+# Sur la branche main, une release est publiée : l'application la détecte
+# et propose « Mise à jour disponible » à tous les utilisateurs.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Lire la version de l'application
+        id: version
+        run: |
+          echo "code=$(grep '^milon.versionCode=' gradle.properties | cut -d= -f2)" >> "$GITHUB_OUTPUT"
+          echo "name=$(grep '^milon.versionName=' gradle.properties | cut -d= -f2)" >> "$GITHUB_OUTPUT"
+
+      - name: Vérifier les mots et construire la base
+        run: |
+          python3 tools/build_db.py --out out \
+            --data-version ${{ github.run_number }} \
+            --tag v${{ github.run_number }} \
+            --app-version-code ${{ steps.version.outputs.code }} \
+            --app-version-name ${{ steps.version.outputs.name }}
+          cp out/milon.db app/src/main/assets/milon.db
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # La clé de signature vient des secrets du dépôt (Settings → Secrets and variables → Actions).
+      # Toutes les versions doivent être signées avec la même clé, sinon Android refuse la mise à jour.
+      - name: Préparer la clé de signature
+        id: signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.MILON_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            mkdir -p keystore
+            echo "$KEYSTORE_BASE64" | base64 -d > keystore/milon.jks
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Secret MILON_KEYSTORE_BASE64 absent : APK de test signé avec une clé de debug, pas de release publiée."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Tests et compilation de l'APK
+        env:
+          MILON_KEYSTORE_PASSWORD: ${{ secrets.MILON_KEYSTORE_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon testDebugUnitTest assembleRelease -Pmilon.dataVersion=${{ github.run_number }}
+          cp app/build/outputs/apk/release/app-release.apk out/milon.apk
+          rm -rf keystore
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: milon-${{ github.run_number }}
+          path: |
+            out/milon.apk
+            out/milon.db.gz
+            out/manifest.json
+
+      - name: Publier la release
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && steps.signing.outputs.ok == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Milon — version ${{ steps.version.outputs.name }}, données n° ${{ github.run_number }}
+          make_latest: "true"
+          body: |
+            **Installer sur Android :** téléchargez `milon.apk` ci-dessous et ouvrez-le
+            (autorisez l'installation depuis votre navigateur si le téléphone le demande).
+
+            Les utilisateurs déjà équipés reçoivent ces données automatiquement depuis l'application.
+          files: |
+            out/milon.apk
+            out/milon.db.gz
+            out/manifest.json

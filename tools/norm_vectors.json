@@ -1,0 +1,247 @@
+[
+ {
+  "in": "בְּרֵאשִׁית",
+  "plain": "בראשית",
+  "skeleton": "בראשת",
+  "latin": "",
+  "fr": []
+ },
+ {
+  "in": "בָּרָא",
+  "plain": "ברא",
+  "skeleton": "ברא",
+  "latin": "",
+  "fr": []
+ },
+ {
+  "in": "אֱלֹהִים",
+  "plain": "אלהימ",
+  "skeleton": "אלהמ",
+  "latin": "",
+  "fr": []
+ },
+ {
+  "in": "שָׁמַיִם",
+  "plain": "שמימ",
+  "skeleton": "שממ",
+  "latin": "",
+  "fr": []
+ },
+ {
+  "in": "אֶרֶץ",
+  "plain": "ארצ",
+  "skeleton": "ארצ",
+  "latin": "",
+  "fr": []
+ },
+ {
+  "in": "בֹּרֵא",
+  "plain": "ברא",
+  "skeleton": "ברא",
+  "latin": "",
+  "fr": []
+ },
+ {
+  "in": "בורא",
+  "plain": "בורא",
+  "skeleton": "ברא",
+  "latin": "",
+  "fr": []
+ },
+ {
+  "in": "קוּדְשָׁא בְּרִיךְ הוּא",
+  "plain": "קודשא בריכ הוא",
+  "skeleton": "קדשא ברכ הא",
+  "latin": "",
+  "fr": []
+ },
+ {
+  "in": "תָּא חֲזֵי",
+  "plain": "תא חזי",
+  "skeleton": "תא חז",
+  "latin": "",
+  "fr": []
+ },
+ {
+  "in": "סִטְרָא־אַחֲרָא",
+  "plain": "סטרא אחרא",
+  "skeleton": "סטרא אחרא",
+  "latin": "",
+  "fr": []
+ },
+ {
+  "in": "עַתִּיק יוֹמִין",
+  "plain": "עתיק יומינ",
+  "skeleton": "עתק ימנ",
+  "latin": "",
+  "fr": []
+ },
+ {
+  "in": "שְׁכִינְתָּא",
+  "plain": "שכינתא",
+  "skeleton": "שכנתא",
+  "latin": "",
+  "fr": []
+ },
+ {
+  "in": "ז״ל",
+  "plain": "זל",
+  "skeleton": "זל",
+  "latin": "",
+  "fr": []
+ },
+ {
+  "in": "ר׳ שמעון",
+  "plain": "ר שמעונ",
+  "skeleton": "ר שמענ",
+  "latin": "",
+  "fr": []
+ },
+ {
+  "in": "שׁ",
+  "plain": "ש",
+  "skeleton": "ש",
+  "latin": "",
+  "fr": []
+ },
+ {
+  "in": "יִשְׂרָאֵל",
+  "plain": "ישראל",
+  "skeleton": "ישראל",
+  "latin": "",
+  "fr": []
+ },
+ {
+  "in": "וַיְהִי",
+  "plain": "ויהי",
+  "skeleton": "וה",
+  "latin": "",
+  "fr": []
+ },
+ {
+  "in": "מִצְוָה",
+  "plain": "מצוה",
+  "skeleton": "מצה",
+  "latin": "",
+  "fr": []
+ },
+ {
+  "in": "מצוות",
+  "plain": "מצוות",
+  "skeleton": "מצת",
+  "latin": "",
+  "fr": []
+ },
+ {
+  "in": "ײִדיש",
+  "plain": "יידיש",
+  "skeleton": "ידש",
+  "latin": "",
+  "fr": []
+ },
+ {
+  "in": "שּׁ",
+  "plain": "ש",
+  "skeleton": "ש",
+  "latin": "",
+  "fr": []
+ },
+ {
+  "in": "Œuvre",
+  "plain": "",
+  "skeleton": "",
+  "latin": "oeuvre",
+  "fr": [
+   "oeuvre"
+  ]
+ },
+ {
+  "in": "créer, façonner",
+  "plain": "",
+  "skeleton": "",
+  "latin": "creer faconner",
+  "fr": [
+   "creer",
+   "faconner"
+  ]
+ },
+ {
+  "in": "l'âme (souffle de vie)",
+  "plain": "",
+  "skeleton": "",
+  "latin": "l ame souffle de vie",
+  "fr": [
+   "ame",
+   "souffle",
+   "vie"
+  ]
+ },
+ {
+  "in": "Être SAINT",
+  "plain": "",
+  "skeleton": "",
+  "latin": "etre saint",
+  "fr": [
+   "etre",
+   "saint"
+  ]
+ },
+ {
+  "in": "à l'écart",
+  "plain": "",
+  "skeleton": "",
+  "latin": "a l ecart",
+  "fr": [
+   "ecart"
+  ]
+ },
+ {
+  "in": "ÉLÉVATION",
+  "plain": "",
+  "skeleton": "",
+  "latin": "elevation",
+  "fr": [
+   "elevation"
+  ]
+ },
+ {
+  "in": "naïf",
+  "plain": "",
+  "skeleton": "",
+  "latin": "naif",
+  "fr": [
+   "naif"
+  ]
+ },
+ {
+  "in": "ex nihilo",
+  "plain": "",
+  "skeleton": "",
+  "latin": "ex nihilo",
+  "fr": [
+   "ex",
+   "nihilo"
+  ]
+ },
+ {
+  "in": "ki-tov",
+  "plain": "",
+  "skeleton": "",
+  "latin": "ki tov",
+  "fr": [
+   "ki",
+   "tov"
+  ]
+ },
+ {
+  "in": "Zohar I 15a",
+  "plain": "",
+  "skeleton": "",
+  "latin": "zohar i 15a",
+  "fr": [
+   "zohar",
+   "i",
+   "15a"
+  ]
+ }
+]
