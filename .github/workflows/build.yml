@@ -60,7 +60,7 @@ jobs:
         run: |
           if [ -n "$KEYSTORE_BASE64" ]; then
             mkdir -p keystore
-            echo "$KEYSTORE_BASE64" | base64 -d > keystore/milon.jks
+            echo "$KEYSTORE_BASE64" | tr -d " \r\n\t" | base64 -d > keystore/milon.jks
             echo "ok=true" >> "$GITHUB_OUTPUT"
           else
             echo "::warning::Secret MILON_KEYSTORE_BASE64 absent : APK de test signé avec une clé de debug, pas de release publiée."

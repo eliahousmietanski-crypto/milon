@@ -25,7 +25,7 @@ android {
     // La clé de signature n'est jamais dans le dépôt : la CI la reconstitue depuis
     // les secrets GitHub MILON_KEYSTORE_BASE64 et MILON_KEYSTORE_PASSWORD.
     val keystore = rootProject.file("keystore/milon.jks")
-    val keystorePassword = System.getenv("MILON_KEYSTORE_PASSWORD")
+    val keystorePassword = System.getenv("MILON_KEYSTORE_PASSWORD")?.trim()
     val canSign = keystore.exists() && !keystorePassword.isNullOrEmpty()
     signingConfigs {
         if (canSign) {
