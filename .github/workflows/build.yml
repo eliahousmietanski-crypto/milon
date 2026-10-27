@@ -41,6 +41,7 @@ jobs:
             --tag v${{ github.run_number }} \
             --app-version-code ${{ steps.version.outputs.code }} \
             --app-version-name ${{ steps.version.outputs.name }}
+          mkdir -p app/src/main/assets
           cp out/milon.db app/src/main/assets/milon.db
 
       - uses: actions/setup-java@v4
