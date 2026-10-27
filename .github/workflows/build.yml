@@ -57,10 +57,19 @@ jobs:
         id: signing
         env:
           KEYSTORE_BASE64: ${{ secrets.MILON_KEYSTORE_BASE64 }}
+          MILON_KEYSTORE_PASSWORD: ${{ secrets.MILON_KEYSTORE_PASSWORD }}
         run: |
           if [ -n "$KEYSTORE_BASE64" ]; then
             mkdir -p keystore
             echo "$KEYSTORE_BASE64" | tr -d " \r\n\t" | base64 -d > keystore/milon.jks
+            # Vérification sans rien révéler : on compare des empreintes, pas les secrets
+            pw=$(printf '%s' "$MILON_KEYSTORE_PASSWORD" | tr -d " \r\n\t")
+            echo "Mot de passe : ${#pw} caractères (attendu : 32)"
+            case "$pw" in http*) echo "::error::Le secret MILON_KEYSTORE_PASSWORD contient une adresse web au lieu du mot de passe.";; \"*|\'*) echo "::error::Le secret MILON_KEYSTORE_PASSWORD contient des guillemets : ne collez que le texte.";; esac
+            [ "$(printf '%s' "$pw" | sha256sum | cut -c1-64)" = "b07d8f5b67f124d6a94262aaac2ce93948322f9166613d5664b09266faf9201f" ] \
+              && echo "MILON_KEYSTORE_PASSWORD : correct" || echo "::error::MILON_KEYSTORE_PASSWORD ne correspond pas au mot de passe attendu."
+            [ "$(sha256sum keystore/milon.jks | cut -c1-64)" = "d0bee1963b2e3c6f1e09f1a942acbeca48671f6f5dcf7da44ba5449711e50094" ] \
+              && echo "MILON_KEYSTORE_BASE64 : correct" || echo "::error::MILON_KEYSTORE_BASE64 ne correspond pas à la clé attendue."
             echo "ok=true" >> "$GITHUB_OUTPUT"
           else
             echo "::warning::Secret MILON_KEYSTORE_BASE64 absent : APK de test signé avec une clé de debug, pas de release publiée."
