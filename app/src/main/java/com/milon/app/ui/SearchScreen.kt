@@ -79,6 +79,7 @@ import com.milon.app.ui.components.SectionTitle
 import com.milon.app.ui.components.backspace
 import com.milon.app.ui.components.insert
 import com.milon.app.ui.theme.HebrewFamily
+import com.milon.app.ui.theme.UiFamily
 import com.milon.app.ui.theme.hebrewStyle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -284,7 +285,7 @@ private fun SearchBar(
                         singleLine = true,
                         cursorBrush = SolidColor(colors.primary),
                         textStyle = TextStyle(
-                            fontFamily = if (isHebrew) HebrewFamily else null,
+                            fontFamily = if (isHebrew) HebrewFamily else UiFamily,
                             fontSize = if (isHebrew) 22.sp else 18.sp,
                             color = colors.onSurface,
                             textDirection = TextDirection.Content,
@@ -325,7 +326,7 @@ private fun SearchBar(
                 TextButton(onClick = onToggleKeyboard) {
                     Text(
                         if (customKb) "Aa" else "א",
-                        fontFamily = if (customKb) null else HebrewFamily,
+                        fontFamily = if (customKb) UiFamily else HebrewFamily,
                         fontSize = 18.sp,
                     )
                 }

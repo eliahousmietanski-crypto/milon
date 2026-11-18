@@ -1,7 +1,11 @@
 package com.milon.app.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -20,6 +24,13 @@ import com.milon.app.R
 val HebrewFamily = FontFamily(
     Font(R.font.hebrew_serif_regular, FontWeight.Normal),
     Font(R.font.hebrew_serif_bold, FontWeight.Bold),
+)
+
+val UiFamily = FontFamily(
+    Font(R.font.ui_sans_regular, FontWeight.Normal),
+    Font(R.font.ui_sans_medium, FontWeight.Medium),
+    Font(R.font.ui_sans_semibold, FontWeight.SemiBold),
+    Font(R.font.ui_sans_bold, FontWeight.Bold),
 )
 
 private val Light = lightColorScheme(
@@ -88,10 +99,27 @@ fun hebrewStyle(size: Float, bold: Boolean = false): TextStyle = TextStyle(
     textDirection = TextDirection.Rtl,
 )
 
+/** Toute l'interface utilise cette police, quelle que soit celle choisie dans le téléphone. */
+private val MilonTypography = Typography().run {
+    fun TextStyle.ui() = copy(fontFamily = UiFamily)
+    Typography(
+        displayLarge = displayLarge.ui(), displayMedium = displayMedium.ui(), displaySmall = displaySmall.ui(),
+        headlineLarge = headlineLarge.ui(), headlineMedium = headlineMedium.ui(), headlineSmall = headlineSmall.ui(),
+        titleLarge = titleLarge.ui(), titleMedium = titleMedium.ui(), titleSmall = titleSmall.ui(),
+        bodyLarge = bodyLarge.ui(), bodyMedium = bodyMedium.ui(), bodySmall = bodySmall.ui(),
+        labelLarge = labelLarge.ui(), labelMedium = labelMedium.ui(), labelSmall = labelSmall.ui(),
+    )
+}
+
 @Composable
 fun MilonTheme(hebrewScale: Float, content: @Composable () -> Unit) {
     val colors = if (isSystemInDarkTheme()) Dark else Light
     CompositionLocalProvider(LocalHebrewScale provides hebrewScale) {
-        MaterialTheme(colorScheme = colors, typography = Typography(), content = content)
+        MaterialTheme(colorScheme = colors, typography = MilonTypography) {
+            // Fond et couleur de texte par défaut : sans cela, le texte reste noir en mode sombre
+            Surface(color = colors.background, contentColor = colors.onBackground, modifier = Modifier.fillMaxSize()) {
+                CompositionLocalProvider(LocalTextStyle provides MilonTypography.bodyLarge, content = content)
+            }
+        }
     }
 }
