@@ -28,4 +28,14 @@ class TextNormTest {
         val key = TextNorm.hebrewSkeleton(TextNorm.hebrewPlain("בֹּרֵא"))
         assertEquals(20, Scoring.hebrew(q, key, SearchKind.SKELETON, 0))
     }
+
+    @Test
+    fun prefixesAreStripped() {
+        assertEquals(
+            listOf("בביתכ" to 1, "ביתכ" to 2, "יתכ" to 3),
+            Prefixes.strip(TextNorm.hebrewPlain("וּבְבֵיתְךָ")),
+        )
+        assertEquals(listOf("ארעא" to 1), Prefixes.strip("דארעא"))
+        assertEquals(emptyList<Pair<String, Int>>(), Prefixes.strip("תא חזי"))
+    }
 }

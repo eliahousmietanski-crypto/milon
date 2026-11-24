@@ -32,6 +32,22 @@ sealed class Query {
     }
 }
 
+/** Préfixes inséparables de l'hébreu et de l'araméen (וּ, הַ, בְּ, כְּ, לְ, מִ, שֶׁ, דְּ). */
+object Prefixes {
+    private const val LETTERS = "ובכלמהשד"
+
+    /** Formes obtenues en retirant 1 à 3 préfixes, avec le nombre de lettres retirées. */
+    fun strip(plain: String): List<Pair<String, Int>> {
+        if (' ' in plain) return emptyList()
+        val out = ArrayList<Pair<String, Int>>()
+        for (n in 1..3) {
+            if (plain.length - n < 2 || plain[n - 1] !in LETTERS) break
+            out += plain.substring(n) to n
+        }
+        return out
+    }
+}
+
 /** Score d'une clé pour une requête : plus petit = plus pertinent, null = pas de correspondance. */
 object Scoring {
     fun hebrew(q: Query.Hebrew, key: String, kind: Int, weight: Int): Int? {

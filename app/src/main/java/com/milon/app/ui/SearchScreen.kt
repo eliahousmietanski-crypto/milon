@@ -5,6 +5,16 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -190,6 +200,7 @@ fun SearchScreen(state: SearchState, nav: NavHostController) {
             onFieldTap = { if (customKb) kbOpen = true },
             onClear = state::clear,
             customKb = customKb,
+            typing = kbOpen && customKb,
             onToggleKeyboard = {
                 if (customKb) {
                     state.customKeyboard = false
@@ -258,11 +269,23 @@ private fun SearchBar(
     onFieldTap: () -> Unit,
     onClear: () -> Unit,
     customKb: Boolean,
+    typing: Boolean,
     onToggleKeyboard: () -> Unit,
     nav: NavHostController,
 ) {
     val colors = MaterialTheme.colorScheme
     val isHebrew = TextNorm.hasHebrew(value.text) || value.text.isEmpty()
+    var focused by remember { mutableStateOf(false) }
+    // Saisie en cours : clavier intégré ouvert, ou champ actif avec le clavier du téléphone
+    val active = typing || (focused && !readOnly)
+    var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
+    // En lecture seule (clavier intégré), Compose n'affiche pas de curseur : on le dessine
+    val blink by rememberInfiniteTransition(label = "curseur").animateFloat(
+        initialValue = 1f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(tween(530, easing = { if (it < 0.5f) 0f else 1f }), RepeatMode.Restart),
+        label = "clignotement",
+    )
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(start = 16.dp, end = 4.dp, top = 12.dp, bottom = 8.dp),
@@ -270,6 +293,7 @@ private fun SearchBar(
         Surface(
             shape = RoundedCornerShape(28.dp),
             color = colors.surfaceContainerHigh,
+            border = if (active) BorderStroke(2.dp, colors.primary) else null,
             modifier = Modifier
                 .weight(1f)
                 .height(56.dp),
@@ -288,13 +312,30 @@ private fun SearchBar(
                             fontFamily = if (isHebrew) HebrewFamily else UiFamily,
                             fontSize = if (isHebrew) 22.sp else 18.sp,
                             color = colors.onSurface,
-                            textDirection = TextDirection.Content,
+                            // Champ vide avec le clavier hébreu : le curseur part de la droite
+                            textDirection = if (value.text.isEmpty() && customKb) TextDirection.Rtl else TextDirection.Content,
                         ),
+                        onTextLayout = { layout = it },
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(onSearch = { }),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .focusRequester(focus),
+                            .focusRequester(focus)
+                            .onFocusChanged { focused = it.isFocused }
+                            .drawWithContent {
+                                drawContent()
+                                val l = layout
+                                if (typing && readOnly && l != null) {
+                                    val r = l.getCursorRect(value.selection.end.coerceIn(0, value.text.length))
+                                    val x = r.left.coerceIn(1f, size.width - 1f)
+                                    drawLine(
+                                        color = colors.primary.copy(alpha = blink),
+                                        start = Offset(x, r.top),
+                                        end = Offset(x, r.bottom),
+                                        strokeWidth = 2.dp.toPx(),
+                                    )
+                                }
+                            },
                         decorationBox = { inner ->
                             if (value.text.isEmpty()) {
                                 Text(

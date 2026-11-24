@@ -108,6 +108,20 @@ class DictionaryDb(private val context: Context, private val settings: Settings)
                 scanKeys(d, q.skeleton, null, "2", langCode) { entry, key, kind, w ->
                     Scoring.hebrew(q, key, kind, w)?.let { s -> scores.merge(entry, s) { a, b -> minOf(a, b) } }
                 }
+                // Mot tel qu'il apparaît dans un texte (וּבְבֵיתְךָ, דְּאַרְעָא) : sans correspondance
+                // exacte, on retire les préfixes ו ה ב כ ל מ ש ד et on cherche à nouveau
+                if (scores.values.none { it < 100 }) {
+                    for ((stem, n) in Prefixes.strip(q.plain)) {
+                        val sq = Query.Hebrew(stem, TextNorm.hebrewSkeleton(stem))
+                        for ((key, kinds) in listOf(sq.plain to "1,3", sq.skeleton to "2")) {
+                            scanKeys(d, key, key, kinds, langCode) { entry, k, kind, w ->
+                                Scoring.hebrew(sq, k, kind, w)?.let { s ->
+                                    scores.merge(entry, s + 40 + 10 * n) { a, b -> minOf(a, b) }
+                                }
+                            }
+                        }
+                    }
+                }
             }
             is Query.Latin -> {
                 val perWord = q.words.mapIndexed { i, word ->

@@ -32,7 +32,7 @@ K_LEMMA, K_SKELETON, K_FORM, K_ROOT, K_FR, K_TRANSLIT = 1, 2, 3, 4, 5, 6
 ENTRY_FIELDS = [
     "id", "lemma", "lang", "dialect", "root", "pos", "binyan", "gender",
     "translit", "forms", "senses", "examples", "equiv", "notes", "source",
-    "verified", "author",
+    "verified", "author", "strong", "freq",
 ]
 
 
@@ -120,12 +120,37 @@ def resolve_equivalents(entries):
     return missing
 
 
-def search_keys(e):
+def load_forms(entries):
+    """Formes attestées (data/formes/*.tsv), rattachées aux entrées par numéro Strong.
+    Renvoie {id d'entrée: [formes]} et complète la fréquence des entrées rédigées à la main."""
+    by_strong = {e["strong"]: uid for uid, e in entries.items() if e.get("strong")}
+    corr = ROOT / "data" / "formes" / "correspondances.tsv"
+    if corr.exists():
+        for line in corr.read_text(encoding="utf-8").splitlines():
+            if line and not line.startswith("#"):
+                sid, uid, count = (line.split("\t") + ["0"])[:3]
+                if uid in entries:
+                    by_strong.setdefault(sid, uid)
+                    entries[uid]["freq"] = entries[uid].get("freq", 0) + int(count or 0)
+    forms = {}
+    for f in sorted((ROOT / "data" / "formes").glob("*.tsv")):
+        if f.name == "correspondances.tsv":
+            continue
+        for line in f.read_text(encoding="utf-8").splitlines():
+            if line and not line.startswith("#"):
+                key, _, words = line.partition("\t")
+                uid = by_strong.get(key, key if key in entries else None)
+                if uid:
+                    forms.setdefault(uid, []).extend(words.split())
+    return forms
+
+
+def search_keys(e, extra_forms=()):
     keys = set()
     lemma = hebrew_plain(e["lemma"])
     keys.add((lemma, K_LEMMA, 0))
     keys.add((hebrew_skeleton(lemma), K_SKELETON, 0))
-    for form in e.get("forms", []):
+    for form in list(e.get("forms", [])) + list(extra_forms):
         p = hebrew_plain(form)
         if p:
             keys.add((p, K_FORM, 0))
@@ -151,6 +176,7 @@ def search_keys(e):
 
 def build(out_dir: Path, data_version: int):
     entries = load_entries()
+    forms = load_forms(entries)
     missing = resolve_equivalents(entries)
     for m in missing:
         print(f"avertissement : équivalence introuvable {m}", file=sys.stderr)
@@ -180,7 +206,8 @@ def build(out_dir: Path, data_version: int):
         CREATE TABLE keys (key TEXT NOT NULL, kind INTEGER NOT NULL, entry INTEGER NOT NULL, w INTEGER NOT NULL);
         """
     )
-    order = sorted(entries.values(), key=lambda e: (hebrew_plain(e["lemma"]), e["lang"], e["id"]))
+    # Les mots les plus fréquents d'abord : à score égal, l'appli les classe en premier
+    order = sorted(entries.values(), key=lambda e: (-e.get("freq", 0), hebrew_plain(e["lemma"]), e["lang"], e["id"]))
     for rowid, e in enumerate(order, 1):
         root_plain = hebrew_plain(e["root"]).replace(" ", "") if e.get("root") else None
         gloss = " ; ".join(s["fr"] for s in e["senses"][:3])
@@ -194,7 +221,7 @@ def build(out_dir: Path, data_version: int):
             ),
         )
         con.executemany(
-            "INSERT INTO keys VALUES (?,?,?,?)", [(k, kind, rowid, w) for k, kind, w in search_keys(e)]
+            "INSERT INTO keys VALUES (?,?,?,?)", [(k, kind, rowid, w) for k, kind, w in search_keys(e, forms.get(e["id"], ()))]
         )
     con.executescript(
         """

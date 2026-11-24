@@ -38,6 +38,10 @@ data class Entry(
     val source: String? = null,
     val verified: Boolean = false,
     val author: String? = null,
+    /** Numéro Strong : relie l'entrée aux formes attestées dans la Bible. */
+    val strong: String? = null,
+    /** Nombre d'occurrences dans la Bible (classement des résultats). */
+    val freq: Int = 0,
 ) {
     val gloss: String get() = senses.take(3).joinToString(" ; ") { it.fr }
 
@@ -76,6 +80,8 @@ data class Entry(
         putOpt("source", source.nullIfBlank())
         if (verified) put("verified", true)
         putOpt("author", author.nullIfBlank())
+        putOpt("strong", strong.nullIfBlank())
+        if (freq > 0) put("freq", freq)
     }
 
     companion object {
@@ -109,6 +115,8 @@ data class Entry(
             source = o.str("source"),
             verified = o.optBoolean("verified", false),
             author = o.str("author"),
+            strong = o.str("strong"),
+            freq = o.optInt("freq", 0),
         )
     }
 }
